@@ -1,11 +1,12 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: Create ECR repository
+description: Create ECR repository if not exists
 inputs:
-  milliseconds: # change this
+  ecr-repository:
+    description: 'ECR Repository'
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+outputs:
+  repository-uri:
+    description: 'ECR Repository URI'
 runs:
   using: 'node16'
   main: 'dist/index.js'

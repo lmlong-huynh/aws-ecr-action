@@ -1,19 +1,41 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import {App, Stack, RemovalPolicy} from 'aws-cdk-lib'
+import {Construct} from 'constructs'
+import * as ecr from 'aws-cdk-lib/aws-ecr'
+class EcrStack extends Stack {
+  constructor(scope: Construct, id: string) {
+    super(scope, id)
 
-async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const repositoryName = core.getInput('ecr-repository')
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    // Create the ECR repository
+    const repository = new ecr.Repository(this, 'Repository', {
+      repositoryName,
+      removalPolicy: RemovalPolicy.DESTROY,
+      imageScanOnPush: true
+    })
 
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    // Add standard lifecycle rules
+    repository.addLifecycleRule({
+      description: 'Only keep 1 untagged image',
+      tagStatus: ecr.TagStatus.UNTAGGED,
+      maxImageCount: 1
+    })
+    repository.addLifecycleRule({
+      description: 'Only keep last 20 images',
+      maxImageCount: 20
+    })
+
+    // Output the repository URI
+    core.setOutput('repository-uri', repository.repositoryUri)
   }
 }
 
-run()
+// Create the CDK app
+const app = new App()
+
+// Create the stack
+new EcrStack(app, 'EcrStack')
+
+// Synthesize the CloudFormation template
+app.synth()
