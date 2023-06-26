@@ -1,7 +1,9 @@
+/* eslint-disable no-console */
 import * as core from '@actions/core'
 import {App, Stack, RemovalPolicy} from 'aws-cdk-lib'
 import {Construct} from 'constructs'
 import * as ecr from 'aws-cdk-lib/aws-ecr'
+
 class EcrStack extends Stack {
   constructor(scope: Construct, id: string) {
     super(scope, id)
@@ -15,6 +17,10 @@ class EcrStack extends Stack {
       imageScanOnPush: true
     })
 
+    console.log('Repository Name: ', repositoryName)
+    console.log('Repository ARN: ', repository.repositoryArn)
+    console.log('Repository URI: ', repository.repositoryUri)
+
     // Add standard lifecycle rules
     repository.addLifecycleRule({
       description: 'Only keep 1 untagged image',
@@ -25,8 +31,7 @@ class EcrStack extends Stack {
       description: 'Only keep last 20 images',
       maxImageCount: 20
     })
-    //eslint-disable-next-line no-console
-    console.log('Repository URI: ', repository.repositoryUri)
+
     // Output the repository URI
     core.setOutput('repository-uri', repository.repositoryUri)
   }
