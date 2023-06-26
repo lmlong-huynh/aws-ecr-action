@@ -25,7 +25,8 @@ class EcrStack extends Stack {
       description: 'Only keep last 20 images',
       maxImageCount: 20
     })
-
+    //eslint-disable-next-line no-console
+    console.log('Repository URI: ', repository.repositoryUri)
     // Output the repository URI
     core.setOutput('repository-uri', repository.repositoryUri)
   }
